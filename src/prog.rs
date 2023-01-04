@@ -13,8 +13,8 @@ impl Prog {
     }
 }
 
-impl From<String> for Prog {
-    fn from(src: String) -> Self {
+impl From<&str> for Prog {
+    fn from(src: &str) -> Self {
         let mut inner = vec![];
 
         for op_c in src.chars() {
@@ -35,6 +35,12 @@ impl From<String> for Prog {
         Self {
             inner,
         }
+    }
+}
+
+impl From<String> for Prog {
+    fn from(src: String) -> Self {
+        src.as_str().into()
     }
 }
 
