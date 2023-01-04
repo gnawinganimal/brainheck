@@ -4,6 +4,7 @@ use std::{fs, io};
 
 use crate::runtime::Runtime;
 
+pub mod op;
 pub mod runtime;
 pub mod prog;
 

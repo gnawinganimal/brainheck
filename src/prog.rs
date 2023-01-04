@@ -1,4 +1,8 @@
 
+use std::fmt::Display;
+
+use crate::op::Op;
+
 pub struct Prog {
     inner: Vec<Op>,
 }
@@ -29,20 +33,25 @@ impl From<String> for Prog {
         }
 
         Self {
-            inner
+            inner,
         }
     }
 }
 
-#[derive(Clone, Copy, Debug)]
-#[repr(u8)]
-pub enum Op {
-    Next,
-    Prev,
-    Add,
-    Sub,
-    Write,
-    Read,
-    Skip,
-    Back,
+impl From<Prog> for String {
+    fn from(value: Prog) -> Self {
+        let mut s = String::new();
+
+        for op in value.inner {
+            s.push(op.into())
+        };
+
+        s
+    }
+}
+
+impl Display for Prog {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", String::from(*self))
+    }
 }
