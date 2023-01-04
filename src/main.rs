@@ -15,10 +15,16 @@ struct Cli {
 
     #[arg(short = 'm', long = "mem", default_value_t = 30000)]
     mem_size: usize, // amount of memory to allocate
+
+    #[arg(short = 'i', long = "input")]
+    read_path: Option<String>, // read from file instead of console
+
+    #[arg(short = 'o', long = "output")]
+    write_path: Option<String>, // write to file instead of console
 }
 
 fn main() {
-    let Cli { path, mem_size } = Cli::parse();
+    let Cli { path, mem_size, read_path, write_path } = Cli::parse();
 
     let _ = fs::read_to_string(path).expect("Could not read file");
     let mut i = io::stdin();
