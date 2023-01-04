@@ -38,12 +38,12 @@ impl From<String> for Prog {
     }
 }
 
-impl From<Prog> for String {
-    fn from(value: Prog) -> Self {
+impl From<&Prog> for String {
+    fn from(value: &Prog) -> Self {
         let mut s = String::new();
 
-        for op in value.inner {
-            s.push(op.into())
+        for op in value.inner.iter() {
+            s.push(char::from(*op))
         };
 
         s
@@ -52,6 +52,6 @@ impl From<Prog> for String {
 
 impl Display for Prog {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", String::from(*self))
+        write!(f, "{}", String::from(self))
     }
 }

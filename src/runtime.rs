@@ -1,7 +1,6 @@
 use std::io::{Read, Write};
 
-use crate::prog::{Prog, Op};
-
+use crate::{prog::Prog, op::Op};
 
 pub struct Runtime<'a> {
     mem: Vec<u8>,
