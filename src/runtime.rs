@@ -1,22 +1,28 @@
-use std::str::Chars;
+use std::{str::Chars, io::{Read, Write}};
 
 
-pub struct Runtime {
+pub struct Runtime<'a> {
     mem: Vec<u8>,
     mp: usize,
     ip: usize,
 
-    addr_stack: Vec<usize>, // might not need
+    reader: &'a mut dyn Read,
+    writer: &'a mut dyn Write,
+
+    ctrl_stack: Vec<usize>, // for control flow
 }
 
-impl Runtime {
-    pub fn new(size: usize) -> Self {
+impl<'a> Runtime<'a> {
+    pub fn new(size: usize, reader: &'a mut dyn Read, writer: &'a mut dyn Write) -> Self {
         Self {
             mem: vec![0; size],
             mp: 0,
             ip: 0,
 
-            addr_stack: vec![],
+            reader,
+            writer,
+
+            ctrl_stack: vec![],
         }
     }
 
@@ -27,13 +33,17 @@ impl Runtime {
                 '<' => self.mp -= 1,
                 '+' => self.mem[self.mp] += 1,
                 '-' => self.mem[self.mp] -= 1,
-                '.' => panic!("not implemented"),
-                ',' => panic!("not implemented"),
+                '.' => {
+                    self.writer.write(&[self.mem[self.mp]]).unwrap();
+                },
+                ',' => if let Some(b) = self.reader.bytes().next() {
+                    self.mem[self.mp] = b.unwrap();
+                },
                 '[' => panic!("not implemented"),
                 ']' => panic!("not implemented"),
 
                 _ => (), // ignore non-instructions
-            }
-        }
+            };
+        };
     }
 }

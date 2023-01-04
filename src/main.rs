@@ -1,6 +1,6 @@
 
 use clap::Parser;
-use std::fs;
+use std::{fs, io};
 
 use crate::runtime::Runtime;
 
@@ -19,5 +19,7 @@ fn main() {
     let Cli { path, mem_size } = Cli::parse();
 
     let _ = fs::read_to_string(path).expect("Could not read file");
-    let _ = Runtime::new(mem_size);
+    let mut i = io::stdin();
+    let mut o = io::stdout();
+    let _ = Runtime::new(mem_size, &mut i, &mut o);
 }
