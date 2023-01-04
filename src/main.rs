@@ -2,6 +2,8 @@
 use clap::Parser;
 use std::fs;
 
+pub mod runtime;
+
 #[derive(Parser, Debug)]
 #[command(author = "Evelyn Heller", version, about = "Brainfuck interpreter", long_about = None)]
 struct Cli {
