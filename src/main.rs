@@ -10,7 +10,7 @@ pub mod runtime;
 pub mod prog;
 
 #[derive(Parser, Debug)]
-#[command(author = "Evelyn Heller", version, about = "Brainfuck interpreter", long_about = None)]
+#[command(author, version, about = "Brainfuck interpreter", long_about = None)]
 struct Cli {
     path: String, // path to the brainfuck source
 

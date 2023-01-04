@@ -1,5 +1,5 @@
 
-use std::fmt::Display;
+use std::{fmt::Display, slice::Iter};
 
 use crate::op::Op;
 
@@ -10,6 +10,10 @@ pub struct Prog {
 impl Prog {
     pub fn get(&self, i: usize) -> Option<Op> {
         self.inner.get(i).cloned()
+    }
+
+    pub fn iter(&self) -> Iter<Op> {
+        self.inner.iter()
     }
 }
 
@@ -48,7 +52,7 @@ impl From<&Prog> for String {
     fn from(value: &Prog) -> Self {
         let mut s = String::new();
 
-        for op in value.inner.iter() {
+        for op in value.iter() {
             s.push(char::from(*op))
         };
 
