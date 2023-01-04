@@ -1,5 +1,7 @@
 use std::{str::Chars, io::{Read, Write}};
 
+use crate::prog::{Prog, Op};
+
 
 pub struct Runtime<'a> {
     mem: Vec<u8>,
@@ -26,21 +28,21 @@ impl<'a> Runtime<'a> {
         }
     }
 
-    pub fn exec(&mut self, mut src: Chars) {
-        while let Some(op) = src.next() {
-            match op {
-                '>' => self.mp += 1,
-                '<' => self.mp -= 1,
-                '+' => self.mem[self.mp] += 1,
-                '-' => self.mem[self.mp] -= 1,
-                '.' => {
+    pub fn exec(&mut self, src: Prog) {
+        loop {
+            match src.get(self.ip).unwrap() {
+                Op::Next => self.mp += 1,
+                Op::Prev => self.mp -= 1,
+                Op::Add => self.mem[self.mp] += 1,
+                Op::Sub => self.mem[self.mp] -= 1,
+                Op::Write => {
                     self.writer.write(&[self.mem[self.mp]]).unwrap();
                 },
-                ',' => if let Some(b) = self.reader.bytes().next() {
+                Op::Read => if let Some(b) = self.reader.bytes().next() {
                     self.mem[self.mp] = b.unwrap();
                 },
-                '[' => panic!("not implemented"),
-                ']' => panic!("not implemented"),
+                Op::Skip => panic!("not implemented"),
+                Op::Back => panic!("not implemented"),
 
                 _ => (), // ignore non-instructions
             };

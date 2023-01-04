@@ -5,6 +5,7 @@ use std::{fs, io};
 use crate::runtime::Runtime;
 
 pub mod runtime;
+pub mod prog;
 
 #[derive(Parser, Debug)]
 #[command(author = "Evelyn Heller", version, about = "Brainfuck interpreter", long_about = None)]
