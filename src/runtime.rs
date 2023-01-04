@@ -1,3 +1,5 @@
+use std::str::Chars;
+
 
 pub struct Runtime {
     mem: Vec<u8>,
@@ -15,6 +17,23 @@ impl Runtime {
             ip: 0,
 
             addr_stack: vec![],
+        }
+    }
+
+    pub fn exec(&mut self, mut src: Chars) {
+        while let Some(op) = src.next() {
+            match op {
+                '>' => self.mp += 1,
+                '<' => self.mp -= 1,
+                '+' => self.mem[self.mp] += 1,
+                '-' => self.mem[self.mp] -= 1,
+                '.' => panic!("not implemented"),
+                ',' => panic!("not implemented"),
+                '[' => panic!("not implemented"),
+                ']' => panic!("not implemented"),
+
+                _ => (), // ignore non-instructions
+            }
         }
     }
 }
