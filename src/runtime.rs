@@ -27,9 +27,9 @@ impl<'a> Runtime<'a> {
         }
     }
 
-    pub fn exec(&mut self, src: Prog) {
+    pub fn exec(&mut self, prog: Prog) {
         loop {
-            match src.get(self.ip).unwrap() {
+            match prog.get(self.ip).unwrap() {
                 Op::Next => self.mp += 1,
                 Op::Prev => self.mp -= 1,
                 Op::Add => self.mem[self.mp] += 1,
@@ -40,11 +40,37 @@ impl<'a> Runtime<'a> {
                 Op::Read => if let Some(b) = self.reader.bytes().next() {
                     self.mem[self.mp] = b.unwrap();
                 },
-                Op::Skip => panic!("not implemented"),
-                Op::Back => panic!("not implemented"),
-
-                _ => (), // ignore non-instructions
+                Op::Skip => {
+                    if self.mem[self.mp] != 0 {
+                        self.ctrl_stack.push(self.ip);
+                    } else {
+                        let mut count = 0;
+                        'ctrl: loop {
+                            self.ip += 1;
+                            if let Some(op) = prog.get(self.ip) {
+                                match op {
+                                    Op::Skip => count += 1,
+                                    Op::Back => {
+                                        if count == 0 {
+                                            break 'ctrl;
+                                        }
+                                        count -= 1;
+                                    },
+                                    _ => (),
+                                }
+                            } else {
+                                break 'ctrl;
+                            }
+                        }
+                    }
+                },
+                Op::Back => {
+                    self.ip = self.ctrl_stack.pop().unwrap() - 1;
+                    
+                },
             };
+
+            self.ip += 1;
         };
     }
 }
