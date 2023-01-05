@@ -4,7 +4,6 @@ use crate::{prog::Prog, op::Op, mem::Mem};
 
 pub struct Runtime<'a> {
     mem: Mem,
-    mp: usize,
     ip: usize,
 
     reader: &'a mut dyn Read,
@@ -17,7 +16,6 @@ impl<'a> Runtime<'a> {
     pub fn new(size: usize, reader: &'a mut dyn Read, writer: &'a mut dyn Write) -> Self {
         Self {
             mem: Mem::new(size),
-            mp: 0,
             ip: 0,
 
             reader,
