@@ -18,7 +18,7 @@ struct Cli {
     mem_size: usize, // amount of memory to allocate
 }
 
-fn main() {
+fn main() -> runtime::Result<()> {
     let Cli { path, mem_size } = Cli::parse();
 
     let program = Program::from(fs::read_to_string(path).expect("Could not find source file"));
@@ -27,5 +27,5 @@ fn main() {
     let mut o = io::stdout();
     let mut rt = Runtime::new(mem_size, &mut i, &mut o);
 
-    rt.exec(program);
+    rt.exec(program)
 }
