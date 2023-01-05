@@ -1,11 +1,14 @@
-use crate::Op;
 use std::{fmt::Display, slice::Iter};
 
-pub struct Prog {
+pub mod op;
+
+pub use op::Op;
+
+pub struct Program {
     inner: Vec<Op>,
 }
 
-impl Prog {
+impl Program {
     pub fn get(&self, i: usize) -> Option<Op> {
         self.inner.get(i).cloned()
     }
@@ -15,7 +18,7 @@ impl Prog {
     }
 }
 
-impl From<&str> for Prog {
+impl From<&str> for Program {
     fn from(src: &str) -> Self {
         let mut inner = vec![];
 
@@ -40,14 +43,14 @@ impl From<&str> for Prog {
     }
 }
 
-impl From<String> for Prog {
+impl From<String> for Program {
     fn from(src: String) -> Self {
         src.as_str().into()
     }
 }
 
-impl From<&Prog> for String {
-    fn from(value: &Prog) -> Self {
+impl From<&Program> for String {
+    fn from(value: &Program) -> Self {
         let mut s = String::new();
 
         for op in value.iter() {
@@ -58,7 +61,7 @@ impl From<&Prog> for String {
     }
 }
 
-impl Display for Prog {
+impl Display for Program {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", String::from(self))
     }

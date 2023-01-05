@@ -1,4 +1,4 @@
-use crate::{Prog, Op, Mem};
+use crate::{Program, Op, Mem};
 use std::io::{Read, Write};
 
 pub struct Runtime<'a> {
@@ -24,7 +24,7 @@ impl<'a> Runtime<'a> {
         }
     }
 
-    pub fn exec(&mut self, prog: Prog) {
+    pub fn exec(&mut self, prog: Program) {
         loop {
             if let Some(op) = prog.get(self.ip) {
                 match op {

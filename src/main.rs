@@ -1,14 +1,12 @@
 use clap::Parser;
 use std::{fs, io};
 
-pub mod op;
+pub mod program;
 pub mod runtime;
-pub mod prog;
 pub mod mem;
 
-pub use op::Op;
+pub use program::{Program, Op};
 pub use runtime::Runtime;
-pub use prog::Prog;
 pub use mem::Mem;
 
 #[derive(Parser, Debug)]
@@ -23,11 +21,11 @@ struct Cli {
 fn main() {
     let Cli { path, mem_size } = Cli::parse();
 
-    let prog: Prog = fs::read_to_string(path).expect("Could not read file").into();
+    let program: Program = Program::from(fs::read_to_string(path).expect("Could not find source file"));
 
     let mut i = io::stdin();
     let mut o = io::stdout();
     let mut rt = Runtime::new(mem_size, &mut i, &mut o);
 
-    rt.exec(prog);
+    rt.exec(program);
 }
