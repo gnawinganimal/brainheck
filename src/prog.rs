@@ -25,8 +25,8 @@ impl From<&str> for Prog {
             match op_c {
                 '>' => inner.push(Op::Next),
                 '<' => inner.push(Op::Prev),
-                '+' => inner.push(Op::Add),
-                '-' => inner.push(Op::Sub),
+                '+' => inner.push(Op::Inc),
+                '-' => inner.push(Op::Dec),
                 '.' => inner.push(Op::Write),
                 ',' => inner.push(Op::Read),
                 '[' => inner.push(Op::Skip),

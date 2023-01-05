@@ -1,9 +1,9 @@
 use std::{io::{Read, Write}};
 
-use crate::{prog::Prog, op::Op};
+use crate::{prog::Prog, op::Op, mem::Mem};
 
 pub struct Runtime<'a> {
-    mem: Vec<u8>,
+    mem: Mem,
     mp: usize,
     ip: usize,
 
@@ -16,7 +16,7 @@ pub struct Runtime<'a> {
 impl<'a> Runtime<'a> {
     pub fn new(size: usize, reader: &'a mut dyn Read, writer: &'a mut dyn Write) -> Self {
         Self {
-            mem: vec![0; size],
+            mem: Mem::new(size),
             mp: 0,
             ip: 0,
 
@@ -31,18 +31,18 @@ impl<'a> Runtime<'a> {
         loop {
             if let Some(op) = prog.get(self.ip) {
                 match op {
-                    Op::Next => self.mp += 1,
-                    Op::Prev => self.mp -= 1,
-                    Op::Add => self.mem[self.mp] += 1,
-                    Op::Sub => self.mem[self.mp] -= 1,
+                    Op::Next => self.mem.next(),
+                    Op::Prev => self.mem.prev(),
+                    Op::Inc => self.mem.inc(),
+                    Op::Dec => self.mem.dec(),
                     Op::Write => {
-                        self.writer.write(&[self.mem[self.mp]]).unwrap();
+                        self.writer.write(&[self.mem.get().unwrap()]).unwrap();
                     },
                     Op::Read => if let Some(b) = self.reader.bytes().next() {
-                        self.mem[self.mp] = b.unwrap();
+                        self.mem.set(b.unwrap());
                     },
                     Op::Skip => {
-                        if self.mem[self.mp] != 0 {
+                        if self.mem.get().unwrap() != 0 {
                             self.ctrl_stack.push(self.ip);
                         } else {
                             let mut count = 0;

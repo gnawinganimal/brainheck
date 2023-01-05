@@ -6,8 +6,8 @@ use std::fmt::Display;
 pub enum Op {
     Next,
     Prev,
-    Add,
-    Sub,
+    Inc,
+    Dec,
     Write,
     Read,
     Skip,
@@ -19,8 +19,8 @@ impl From<Op> for char {
         match value {
             Op::Next => '>',
             Op::Prev => '<',
-            Op::Add => '+',
-            Op::Sub => '-',
+            Op::Inc => '+',
+            Op::Dec => '-',
             Op::Write => '.',
             Op::Read => ',',
             Op::Skip => '[',

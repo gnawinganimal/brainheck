@@ -8,6 +8,7 @@ use crate::runtime::Runtime;
 pub mod op;
 pub mod runtime;
 pub mod prog;
+pub mod mem;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Brainfuck interpreter", long_about = None)]
