@@ -21,7 +21,7 @@ struct Cli {
 fn main() {
     let Cli { path, mem_size } = Cli::parse();
 
-    let program: Program = Program::from(fs::read_to_string(path).expect("Could not find source file"));
+    let program = Program::from(fs::read_to_string(path).expect("Could not find source file"));
 
     let mut i = io::stdin();
     let mut o = io::stdout();
