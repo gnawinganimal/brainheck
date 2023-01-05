@@ -1,7 +1,5 @@
-
+use crate::Op;
 use std::{fmt::Display, slice::Iter};
-
-use crate::op::Op;
 
 pub struct Prog {
     inner: Vec<Op>,

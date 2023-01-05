@@ -1,6 +1,5 @@
-use std::{io::{Read, Write}};
-
-use crate::{prog::Prog, op::Op, mem::Mem};
+use crate::{Prog, Op, Mem};
+use std::io::{Read, Write};
 
 pub struct Runtime<'a> {
     mem: Mem,
