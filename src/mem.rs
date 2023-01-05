@@ -1,20 +1,18 @@
 use std::{mem, alloc::{alloc, Layout, dealloc}};
 
 pub struct Mem {
-    inner: *mut u8,
-    ptr: usize,
+    ptr: *mut u8,
     len: usize,
 }
 
 impl Mem {
     pub fn new(len: usize) -> Self {
         Self { 
-            inner: unsafe {
+            ptr: unsafe {
                 let layout = Layout::from_size_align_unchecked(len, mem::size_of::<u8>());
                 alloc(layout)
             },
-            ptr: 0,
-            len 
+            len,
         }
     }
 
@@ -22,45 +20,33 @@ impl Mem {
         self.len
     }
 
-    pub fn ptr(&self) -> usize {
-        self.ptr
-    }
-
-    pub fn get(&self) -> Option<u8> {
-        if self.ptr < self.len {
+    pub fn get(&self, i: usize) -> Option<u8> {
+        if i < self.len {
             unsafe {
-                Some(*self.inner.add(self.ptr))
+                Some(*self.ptr.add(i))
             }
         } else {
             None
         }
     }
 
-    pub fn set(&mut self, b: u8) {
-        if self.ptr < self.len {
+    pub fn get_ref(&self, i: usize) -> Option<&u8> {
+        if i < self.len {
             unsafe {
-                *self.inner.add(self.ptr) = b;
+                Some(&*self.ptr.add(i))
             }
+        } else {
+            None
         }
     }
 
-    pub fn prev(&mut self) {
-        self.ptr -= 1;
-    }
-
-    pub fn next(&mut self) {
-        self.ptr += 1;
-    }
-
-    pub fn inc(&mut self) {
-        unsafe {
-            *self.inner.add(self.ptr) += 1;
-        }
-    }
-
-    pub fn dec(&mut self) {
-        unsafe {
-            *self.inner.add(self.ptr) -= 1;
+    pub fn get_mut(&mut self, i: usize) -> Option<&mut u8> {
+        if i < self.len {
+            unsafe {
+                Some(&mut *self.ptr.add(i))
+            }
+        } else {
+            None
         }
     }
 }
@@ -69,7 +55,7 @@ impl Drop for Mem {
     fn drop(&mut self) {
         unsafe {
             dealloc(
-                self.inner,
+                self.ptr,
                 Layout::from_size_align_unchecked(self.len, mem::size_of::<u8>())
             )
         };

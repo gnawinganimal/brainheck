@@ -3,6 +3,7 @@ use std::io::{Read, Write};
 
 pub struct Runtime<'a> {
     mem: Mem,
+    mp: usize,
     ip: usize,
 
     reader: &'a mut dyn Read,
@@ -16,6 +17,7 @@ impl<'a> Runtime<'a> {
         Self {
             mem: Mem::new(size),
             ip: 0,
+            mp: 0,
 
             reader,
             writer,
@@ -24,22 +26,22 @@ impl<'a> Runtime<'a> {
         }
     }
 
-    pub fn exec(&mut self, prog: Program) {
+    pub fn exec(&mut self, prog: Program) -> Result<()> {
         loop {
             if let Some(op) = prog.get(self.ip) {
                 match op {
-                    Op::Next => self.mem.next(),
-                    Op::Prev => self.mem.prev(),
-                    Op::Inc => self.mem.inc(),
-                    Op::Dec => self.mem.dec(),
+                    Op::Next => self.mp += 1,
+                    Op::Prev => self.mp -= 1,
+                    Op::Inc => *self.mem.get_mut(self.mp).unwrap() += 1,
+                    Op::Dec => *self.mem.get_mut(self.mp).unwrap() -= 1,
                     Op::Write => {
-                        self.writer.write(&[self.mem.get().unwrap()]).unwrap();
+                        self.writer.write(&[self.mem.get(self.mp).unwrap()]).unwrap();
                     },
                     Op::Read => if let Some(b) = self.reader.bytes().next() {
-                        self.mem.set(b.unwrap());
+                        *self.mem.get_mut(self.mp).unwrap() = b.unwrap();
                     },
                     Op::Skip => {
-                        if self.mem.get().unwrap() != 0 {
+                        if self.mem.get(self.mp).unwrap() != 0 {
                             self.ctrl_stack.push(self.ip);
                         } else {
                             let mut count = 0;
@@ -70,6 +72,12 @@ impl<'a> Runtime<'a> {
     
                 self.ip += 1;
             }
-        }
+        };
     }
+}
+
+pub type Result<T> = std::result::Result<T, Error>;
+
+pub enum Error {
+    MemError,
 }
