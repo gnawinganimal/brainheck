@@ -7,7 +7,7 @@ pub mod mem;
 
 pub use program::{Program, Op};
 pub use runtime::Runtime;
-pub use mem::Mem;
+pub use mem::{Mem, Array};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Brainfuck interpreter", long_about = None)]
