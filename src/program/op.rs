@@ -1,7 +1,7 @@
 
 use std::fmt::Display;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 #[repr(u8)]
 pub enum Op {
     Next,

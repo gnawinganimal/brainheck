@@ -61,8 +61,46 @@ impl From<&Program> for String {
     }
 }
 
+impl From<Vec<Op>> for Program {
+    fn from(inner: Vec<Op>) -> Self {
+        Self {
+            inner,
+        }
+    }
+}
+
+impl From<Program> for Vec<Op> {
+    fn from(program: Program) -> Self {
+        program.inner
+    }
+}
+
 impl Display for Program {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", String::from(self))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use std::borrow::Borrow;
+
+    use super::*;
+    use super::Op::*;
+
+    #[test]
+    fn decode_program() {
+        let program = Program::from("[->+<]");
+
+        let ops: Vec<Op> = program.into();
+        assert_eq!(ops, vec![Skip, Dec, Next, Inc, Prev, Back])
+    }
+
+    #[test]
+    fn encode_program() {
+        let program = Program::from(vec![Skip, Dec, Next, Inc, Prev, Back]);
+
+        let src: String = program.borrow().into();
+        assert_eq!(src, "[->+<]")
     }
 }
