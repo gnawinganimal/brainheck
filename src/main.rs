@@ -1,3 +1,5 @@
+use clap::Parser;
+use std::{fs, io};
 
 pub mod op;
 pub mod runtime;
@@ -8,9 +10,6 @@ pub use op::Op;
 pub use runtime::Runtime;
 pub use prog::Prog;
 pub use mem::Mem;
-
-use clap::Parser;
-use std::{fs, io};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Brainfuck interpreter", long_about = None)]
