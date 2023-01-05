@@ -1,5 +1,5 @@
-use crate::{Program, Op, Mem};
-use std::io::{Read, Write};
+use crate::{Program, Op, Mem, mem};
+use std::io::{self, Read, Write};
 
 pub struct Runtime<'a> {
     mem: Mem,
@@ -29,18 +29,18 @@ impl<'a> Runtime<'a> {
         loop {
             if let Some(op) = prog.get(self.ip) {
                 match op {
-                    Op::Next => self.mem.inc_ptr().unwrap(),
-                    Op::Prev => self.mem.dec_ptr().unwrap(),
-                    Op::Inc => self.mem.inc_cur().unwrap(),
-                    Op::Dec => self.mem.dec_cur().unwrap(),
+                    Op::Next => self.mem.inc_ptr().map_err(|e| Error::Mem(e))?,
+                    Op::Prev => self.mem.dec_ptr().map_err(|e| Error::Mem(e))?,
+                    Op::Inc => self.mem.inc_cur().map_err(|e| Error::Mem(e))?,
+                    Op::Dec => self.mem.dec_cur().map_err(|e| Error::Mem(e))?,
                     Op::Write => {
-                        self.writer.write(&[self.mem.get_cur().unwrap()]).unwrap();
+                        self.writer.write(&[self.mem.get_cur().map_err(|e| Error::Mem(e))?]).map_err(|e| Error::Io(e))?;
                     },
                     Op::Read => if let Some(b) = self.reader.bytes().next() {
-                        self.mem.set_cur(b.unwrap()).unwrap();
+                        self.mem.set_cur(b.map_err(|e| Error::Io(e))?).map_err(|e| Error::Mem(e))?;
                     },
                     Op::Skip => {
-                        if self.mem.get_cur().unwrap() != 0 {
+                        if self.mem.get_cur().map_err(|e| Error::Mem(e))? != 0 {
                             self.ctrl_stack.push(self.ip);
                         } else {
                             let mut count = 0;
@@ -77,7 +77,20 @@ impl<'a> Runtime<'a> {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Debug)]
 pub enum Error {
-    MemError,
+    Mem(mem::Error),
+    Io(io::Error),
+}
+
+impl From<mem::Error> for Error {
+    fn from(value: mem::Error) -> Self {
+        Self::Mem(value)
+    }
+}
+
+impl From<io::Error> for Error {
+    fn from(value: io::Error) -> Self {
+        Self::Io(value)
+    }
 }
