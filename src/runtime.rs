@@ -1,8 +1,18 @@
 use crate::{Program, Op, Tape, tape};
 use std::io::{self, Read, Write};
 
-pub struct Runtime<'a> {
-    tape: Tape,
+pub type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Debug)]
+pub enum Error {
+    IndexOutOfBounds,
+    Read,
+    Write,
+}
+
+pub struct Runtime<'a, T: Tape> {
+    tape: T,
+    tp: usize,
 
     reader: &'a mut dyn Read,
     writer: &'a mut dyn Write,
@@ -12,35 +22,54 @@ pub struct Runtime<'a> {
     ip: usize, // program counter
 }
 
-impl<'a> Runtime<'a> {
+impl<'a, T: Tape> Runtime<'a, T> {
     pub fn new(len: usize, reader: &'a mut dyn Read, writer: &'a mut dyn Write) -> Self {
         Self {
             tape: Tape::new(len),
-            ip: 0,
+            tp: 0,
 
             reader,
             writer,
 
             ctrl_stack: vec![],
+
+            ip: 0,
         }
+    }
+
+    pub fn get_cur(&self) -> Result<u8> {
+        self.tape.get(self.tp).map_err(|e| Error::IndexOutOfBounds)
+    }
+
+    pub fn set_cur(&mut self, b: u8) -> Result<()> {
+        self.tape.set(self.tp, b).map_err(|e| Error::IndexOutOfBounds)
+    }
+
+    pub fn add_cur(&mut self, b: u8) -> Result<()> {
+        self.set_cur(self.get_cur()? + b)
+    }
+
+    pub fn sub_cur(&mut self, b: u8) -> Result<()> {
+        self.set_cur(self.get_cur()? - b)
     }
 
     pub fn exec(&mut self, prog: Program) -> Result<()> {
         loop {
             if let Some(op) = prog.get(self.ip) {
                 match op {
-                    Op::Next => self.tape.inc_ptr().map_err(|e| Error::Mem(e))?,
-                    Op::Prev => self.tape.dec_ptr().map_err(|e| Error::Mem(e))?,
-                    Op::Inc => self.tape.inc_cur().map_err(|e| Error::Mem(e))?,
-                    Op::Dec => self.tape.dec_cur().map_err(|e| Error::Mem(e))?,
+                    Op::Next => self.tp += 1,
+                    Op::Prev => self.tp -= 1,
+                    Op::Inc =>  self.add_cur(1)?,
+                    Op::Dec =>  self.sub_cur(1)?,
                     Op::Write => {
-                        self.writer.write(&[self.tape.get_cur().map_err(|e| Error::Mem(e))?]).map_err(|e| Error::Io(e))?;
+                        self.writer.write(&[self.get_cur()?])
+                            .map_err(|_| Error::Write)?;
                     },
-                    Op::Read => if let Some(b) = self.reader.bytes().next() {
-                        self.tape.set_cur(b.map_err(|e| Error::Io(e))?).map_err(|e| Error::Mem(e))?;
+                    Op::Read => if let Some(Ok(b)) = self.reader.bytes().next() {
+                        self.set_cur(b)?;
                     },
                     Op::Skip => {
-                        if self.tape.get_cur().map_err(|e| Error::Mem(e))? != 0 {
+                        if self.get_cur()? != 0 {
                             self.ctrl_stack.push(self.ip);
                         } else {
                             let mut count = 0;
@@ -72,25 +101,5 @@ impl<'a> Runtime<'a> {
                 self.ip += 1;
             }
         };
-    }
-}
-
-pub type Result<T> = std::result::Result<T, Error>;
-
-#[derive(Debug)]
-pub enum Error {
-    Mem(tape::Error),
-    Io(io::Error),
-}
-
-impl From<tape::Error> for Error {
-    fn from(value: tape::Error) -> Self {
-        Self::Mem(value)
-    }
-}
-
-impl From<io::Error> for Error {
-    fn from(value: io::Error) -> Self {
-        Self::Io(value)
     }
 }

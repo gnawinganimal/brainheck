@@ -25,7 +25,7 @@ fn main() -> runtime::Result<()> {
 
     let mut i = io::stdin();
     let mut o = io::stdout();
-    let mut rt = Runtime::new(mem_size, &mut i, &mut o);
+    let mut rt: Runtime<tape::Array> = Runtime::new(mem_size, &mut i, &mut o);
 
     rt.exec(program)
 }
