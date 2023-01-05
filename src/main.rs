@@ -3,11 +3,11 @@ use std::{fs, io};
 
 pub mod program;
 pub mod runtime;
-pub mod mem;
+pub mod tape;
 
 pub use program::{Program, Op};
 pub use runtime::Runtime;
-pub use mem::{Mem, Array};
+pub use tape::{Tape, Array};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Brainfuck interpreter", long_about = None)]

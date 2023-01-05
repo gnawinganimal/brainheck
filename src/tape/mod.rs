@@ -3,12 +3,12 @@ pub mod array;
 
 pub use array::Array;
 
-pub struct Mem {
+pub struct Tape {
     arr: Array<u8>,
     cur: usize,
 }
 
-impl Mem {
+impl Tape {
     pub fn new(len: usize) -> Self {
         Self {
             arr: Array::new(len),

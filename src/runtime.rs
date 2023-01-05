@@ -1,8 +1,8 @@
-use crate::{Program, Op, Mem, mem};
+use crate::{Program, Op, Tape, tape};
 use std::io::{self, Read, Write};
 
 pub struct Runtime<'a> {
-    mem: Mem,
+    tape: Tape,
 
     reader: &'a mut dyn Read,
     writer: &'a mut dyn Write,
@@ -15,7 +15,7 @@ pub struct Runtime<'a> {
 impl<'a> Runtime<'a> {
     pub fn new(len: usize, reader: &'a mut dyn Read, writer: &'a mut dyn Write) -> Self {
         Self {
-            mem: Mem::new(len),
+            tape: Tape::new(len),
             ip: 0,
 
             reader,
@@ -29,18 +29,18 @@ impl<'a> Runtime<'a> {
         loop {
             if let Some(op) = prog.get(self.ip) {
                 match op {
-                    Op::Next => self.mem.inc_ptr().map_err(|e| Error::Mem(e))?,
-                    Op::Prev => self.mem.dec_ptr().map_err(|e| Error::Mem(e))?,
-                    Op::Inc => self.mem.inc_cur().map_err(|e| Error::Mem(e))?,
-                    Op::Dec => self.mem.dec_cur().map_err(|e| Error::Mem(e))?,
+                    Op::Next => self.tape.inc_ptr().map_err(|e| Error::Mem(e))?,
+                    Op::Prev => self.tape.dec_ptr().map_err(|e| Error::Mem(e))?,
+                    Op::Inc => self.tape.inc_cur().map_err(|e| Error::Mem(e))?,
+                    Op::Dec => self.tape.dec_cur().map_err(|e| Error::Mem(e))?,
                     Op::Write => {
-                        self.writer.write(&[self.mem.get_cur().map_err(|e| Error::Mem(e))?]).map_err(|e| Error::Io(e))?;
+                        self.writer.write(&[self.tape.get_cur().map_err(|e| Error::Mem(e))?]).map_err(|e| Error::Io(e))?;
                     },
                     Op::Read => if let Some(b) = self.reader.bytes().next() {
-                        self.mem.set_cur(b.map_err(|e| Error::Io(e))?).map_err(|e| Error::Mem(e))?;
+                        self.tape.set_cur(b.map_err(|e| Error::Io(e))?).map_err(|e| Error::Mem(e))?;
                     },
                     Op::Skip => {
-                        if self.mem.get_cur().map_err(|e| Error::Mem(e))? != 0 {
+                        if self.tape.get_cur().map_err(|e| Error::Mem(e))? != 0 {
                             self.ctrl_stack.push(self.ip);
                         } else {
                             let mut count = 0;
@@ -79,12 +79,12 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {
-    Mem(mem::Error),
+    Mem(tape::Error),
     Io(io::Error),
 }
 
-impl From<mem::Error> for Error {
-    fn from(value: mem::Error) -> Self {
+impl From<tape::Error> for Error {
+    fn from(value: tape::Error) -> Self {
         Self::Mem(value)
     }
 }
