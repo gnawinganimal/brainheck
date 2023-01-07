@@ -1,5 +1,5 @@
-use crate::{Program, Op, Tape, tape};
-use std::io::{self, Read, Write};
+use crate::{Program, Op, Tape};
+use std::io::{Read, Write};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -38,11 +38,11 @@ impl<'a, T: Tape> Runtime<'a, T> {
     }
 
     pub fn get_cur(&self) -> Result<u8> {
-        self.tape.get(self.tp).map_err(|e| Error::IndexOutOfBounds)
+        self.tape.get(self.tp).map_err(|_| Error::IndexOutOfBounds)
     }
 
     pub fn set_cur(&mut self, b: u8) -> Result<()> {
-        self.tape.set(self.tp, b).map_err(|e| Error::IndexOutOfBounds)
+        self.tape.set(self.tp, b).map_err(|_| Error::IndexOutOfBounds)
     }
 
     pub fn add_cur(&mut self, b: u8) -> Result<()> {
