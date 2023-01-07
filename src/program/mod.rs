@@ -16,7 +16,6 @@ impl Program {
         let mut stack = Vec::new();
 
         while let Some(c) = chars.next() {
-            println!("{}", c);
             let op = match c {
                 '>' => {
                     let mut count = 1;
@@ -53,12 +52,10 @@ impl Program {
                 '.' => Write,
                 ',' => Read,
                 '[' => {
-                    println!("[ found!");
                     stack.push(inner.len());
                     continue;
                 },
                 ']' => {
-                    println!("] found!");
                     if let Some(other) = stack.pop() {
                         inner.insert(other, Jump(inner.len()));
                         Back(other)
@@ -71,9 +68,6 @@ impl Program {
             };
 
             inner.push(op);
-
-            println!("Current program: {:?}", inner);
-            println!("Current stack: {:?}", stack);
         };
 
         Self {
