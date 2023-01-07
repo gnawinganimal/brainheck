@@ -1,106 +1,95 @@
-use std::{fmt::Display, slice::Iter};
+use std::slice::Iter;
 
 pub mod op;
 
-pub use op::Op;
+pub use op::Operation::{self, *};
 
 pub struct Program {
-    inner: Vec<Op>,
+    inner: Vec<Operation>,
 }
 
 impl Program {
-    pub fn get(&self, i: usize) -> Option<Op> {
-        self.inner.get(i).cloned()
-    }
+    pub fn parse(src: String) -> Self {
+        let mut chars = src.chars().peekable();
+        let mut inner = Vec::new();
 
-    pub fn iter(&self) -> Iter<Op> {
-        self.inner.iter()
-    }
-}
+        let mut stack = Vec::new();
 
-impl From<&str> for Program {
-    fn from(src: &str) -> Self {
-        let mut inner = vec![];
+        while let Some(c) = chars.next() {
+            println!("{}", c);
+            let op = match c {
+                '>' => {
+                    let mut count = 1;
+                    while let Some('>') = chars.peek() {
+                        chars.next();
+                        count += 1;
+                    };
+                    AddPtr(count)
+                },
+                '<' => {
+                    let mut count = 1;
+                    while let Some('<') = chars.peek() {
+                        chars.next();
+                        count += 1;
+                    };
+                    SubPtr(count)
+                },
+                '+' => {
+                    let mut count = 1;
+                    while let Some('+') = chars.peek() {
+                        chars.next();
+                        count += 1;
+                    };
+                    AddCur(count)
+                },
+                '-' => {
+                    let mut count = 1;
+                    while let Some('-') = chars.peek() {
+                        chars.next();
+                        count += 1;
+                    };
+                    SubCur(count)
+                },
+                '.' => Write,
+                ',' => Read,
+                '[' => {
+                    println!("[ found!");
+                    stack.push(inner.len());
+                    continue;
+                },
+                ']' => {
+                    println!("] found!");
+                    if let Some(other) = stack.pop() {
+                        inner.insert(other, Jump(inner.len()));
+                        Back(other)
+                    } else {
+                        panic!("Matching bracket not found")
+                    }
+                },
 
-        for op_c in src.chars() {
-            match op_c {
-                '>' => inner.push(Op::Next),
-                '<' => inner.push(Op::Prev),
-                '+' => inner.push(Op::Inc),
-                '-' => inner.push(Op::Dec),
-                '.' => inner.push(Op::Write),
-                ',' => inner.push(Op::Read),
-                '[' => inner.push(Op::Skip),
-                ']' => inner.push(Op::Back),
-
-                _ => (),
+                _ => continue,
             };
-        }
 
-        Self {
-            inner,
-        }
-    }
-}
+            inner.push(op);
 
-impl From<String> for Program {
-    fn from(src: String) -> Self {
-        src.as_str().into()
-    }
-}
-
-impl From<&Program> for String {
-    fn from(value: &Program) -> Self {
-        let mut s = String::new();
-
-        for op in value.iter() {
-            s.push(char::from(*op))
+            println!("Current program: {:?}", inner);
+            println!("Current stack: {:?}", stack);
         };
 
-        s
-    }
-}
-
-impl From<Vec<Op>> for Program {
-    fn from(inner: Vec<Op>) -> Self {
         Self {
             inner,
         }
     }
-}
 
-impl From<Program> for Vec<Op> {
-    fn from(program: Program) -> Self {
-        program.inner
-    }
-}
-
-impl Display for Program {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", String::from(self))
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use std::borrow::Borrow;
-
-    use super::*;
-    use super::Op::*;
-
-    #[test]
-    fn decode_program() {
-        let program = Program::from("[->+<]");
-
-        let ops: Vec<Op> = program.into();
-        assert_eq!(ops, vec![Skip, Dec, Next, Inc, Prev, Back])
+    pub fn len(&self) -> usize {
+        self.inner.len()
     }
 
-    #[test]
-    fn encode_program() {
-        let program = Program::from(vec![Skip, Dec, Next, Inc, Prev, Back]);
+    pub fn get(&self, i: usize) -> Option<&Operation> {
+        self.inner.get(i)
+    }
 
-        let src: String = program.borrow().into();
-        assert_eq!(src, "[->+<]")
+    pub fn iter(&self) -> Iter<Operation> {
+        self.inner.iter()
     }
 }

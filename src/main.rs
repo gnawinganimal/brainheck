@@ -5,7 +5,7 @@ pub mod program;
 pub mod runtime;
 pub mod tape;
 
-pub use program::{Program, Op};
+pub use program::{Program, Operation};
 pub use runtime::Runtime;
 pub use tape::{Tape, Array};
 
@@ -21,7 +21,7 @@ struct Cli {
 fn main() -> runtime::Result<()> {
     let Cli { path, mem_size } = Cli::parse();
 
-    let program = Program::from(fs::read_to_string(path).expect("Could not find source file"));
+    let program = Program::parse(fs::read_to_string(path).expect("Could not find source file"));
 
     let mut i = io::stdin();
     let mut o = io::stdout();
