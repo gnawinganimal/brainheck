@@ -18,7 +18,7 @@ impl Program {
         while let Some(c) = chars.next() {
             let op = match c {
                 '>' => {
-                    let mut count = 0;
+                    let mut count = 1;
                     while let Some('>') = chars.peek() {
                         chars.next();
                         count += 1;
@@ -26,7 +26,7 @@ impl Program {
                     AddPtr(count)
                 },
                 '<' => {
-                    let mut count = 0;
+                    let mut count = 1;
                     while let Some('<') = chars.peek() {
                         chars.next();
                         count += 1;
@@ -34,7 +34,7 @@ impl Program {
                     SubPtr(count)
                 },
                 '+' => {
-                    let mut count = 0;
+                    let mut count = 1;
                     while let Some('+') = chars.peek() {
                         chars.next();
                         count += 1;
@@ -42,7 +42,7 @@ impl Program {
                     AddCur(count)
                 },
                 '-' => {
-                    let mut count = 0;
+                    let mut count = 1;
                     while let Some('-') = chars.peek() {
                         chars.next();
                         count += 1;
@@ -57,7 +57,7 @@ impl Program {
                 },
                 ']' => {
                     if let Some(other) = stack.pop() {
-                        inner.insert(other, Jump(inner.len()));
+                        inner.insert(other, Jump(inner.len() + 1));
                         Back(other)
                     } else {
                         panic!("Matching bracket not found")
@@ -85,5 +85,18 @@ impl Program {
 
     pub fn iter(&self) -> Iter<Operation> {
         self.inner.iter()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn decode_program() {
+        let program = Program::parse(String::from("[->+<]"));
+        let ops: Vec<_> = program.iter().copied().collect();
+
+        assert_eq!(ops, vec![Jump(5), SubCur(1), AddPtr(1), AddCur(1), SubPtr(1), Back(0)])
     }
 }

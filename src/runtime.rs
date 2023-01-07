@@ -37,17 +37,6 @@ impl<'a, T: Tape> Runtime<'a, T> {
         loop {
             if let Some(op) = prog.get(self.ip) {
                 match op {
-                    AddPtr(n) => println!("> {}", n),
-                    SubPtr(n) => println!("< {}", n),
-                    AddCur(n) => println!("+ {}", n),
-                    SubCur(n) => println!("- {}", n),
-                    Write => println!("."),
-                    Read => println!(","),
-                    Jump(n) => println!("[ {}", n),
-                    Back(n) => println!("] {}", n),
-                };
-
-                match op {
                     AddPtr(n) => self.tp = self.tp.wrapping_add(*n),
                     SubPtr(n) => self.tp = self.tp.wrapping_sub(*n),
                     AddCur(n) => self.tape.add(self.tp, *n),
