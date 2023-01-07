@@ -18,7 +18,7 @@ impl Program {
         while let Some(c) = chars.next() {
             let op = match c {
                 '>' => {
-                    let mut count = 1;
+                    let mut count = 0;
                     while let Some('>') = chars.peek() {
                         chars.next();
                         count += 1;
@@ -26,7 +26,7 @@ impl Program {
                     AddPtr(count)
                 },
                 '<' => {
-                    let mut count = 1;
+                    let mut count = 0;
                     while let Some('<') = chars.peek() {
                         chars.next();
                         count += 1;
@@ -34,7 +34,7 @@ impl Program {
                     SubPtr(count)
                 },
                 '+' => {
-                    let mut count = 1;
+                    let mut count = 0;
                     while let Some('+') = chars.peek() {
                         chars.next();
                         count += 1;
@@ -42,7 +42,7 @@ impl Program {
                     AddCur(count)
                 },
                 '-' => {
-                    let mut count = 1;
+                    let mut count = 0;
                     while let Some('-') = chars.peek() {
                         chars.next();
                         count += 1;

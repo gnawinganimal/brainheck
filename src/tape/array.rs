@@ -1,6 +1,6 @@
 use std::{mem, alloc::{Layout, alloc, dealloc}};
 
-use super::{Tape, Result, Error};
+use super::Tape;
 
 pub struct Array {
     ptr: *mut u8,
@@ -22,23 +22,31 @@ impl Tape for Array {
         self.len
     }
 
-    fn get(&self, i: usize) -> Result<u8> {
+    fn get(&self, i: usize) -> Option<&u8> {
         if i < self.len {
             unsafe {
-                Ok(*self.ptr.add(i))
+                Some(&*self.ptr.add(i))
             }
         } else {
-            Err(Error::IndexOutOfBounds)
+            None
         }
     }
 
-    fn set(&mut self, i: usize, b: u8) -> Result<()> {
-        if i < self.len {
-            unsafe {
-                Ok(*self.ptr.add(i) = b)
-            }
-        } else {
-            Err(Error::IndexOutOfBounds)
+    fn set(&mut self, i: usize, b: u8) {
+        unsafe {
+            *self.ptr.add(i) = b;
+        }
+    }
+
+    fn add(&mut self, i: usize, b: u8) {
+        unsafe {
+            *self.ptr.add(i) = (*self.ptr.add(i)).wrapping_add(b);
+        }
+    }
+
+    fn sub(&mut self, i: usize, b: u8) {
+        unsafe {
+            *self.ptr.add(i) = (*self.ptr.add(i)).wrapping_sub(b);
         }
     }
 }

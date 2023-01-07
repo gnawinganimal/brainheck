@@ -4,8 +4,8 @@ pub use Operation::*;
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum Operation {
-    AddPtr(u8),
-    SubPtr(u8),
+    AddPtr(usize),
+    SubPtr(usize),
     AddCur(u8),
     SubCur(u8),
     Read,
