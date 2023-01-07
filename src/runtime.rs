@@ -81,7 +81,9 @@ impl<'a, T: Tape> Runtime<'a, T> {
                 };
     
                 self.ip += 1;
+            } else {
+                break Ok(())
             }
-        };
+        }
     }
 }
