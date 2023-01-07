@@ -1,4 +1,4 @@
-use std::slice::Iter;
+use std::{slice::Iter, fmt::{Display, Write}};
 
 pub mod op;
 
@@ -85,6 +85,18 @@ impl Program {
 
     pub fn iter(&self) -> Iter<Operation> {
         self.inner.iter()
+    }
+}
+
+impl Display for Program {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut s = String::new();
+
+        for op in self.iter() {
+            write!(s, "{}", op)?;
+        }
+
+        write!(f, "{}", s)
     }
 }
 
