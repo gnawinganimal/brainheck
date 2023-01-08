@@ -53,11 +53,12 @@ impl Program {
                 ',' => Read,
                 '[' => {
                     stack.push(inner.len());
+                    inner.push(Jump(0));
                     continue;
                 },
                 ']' => {
                     if let Some(other) = stack.pop() {
-                        inner.insert(other, Jump(inner.len() + 1));
+                        *inner.get_mut(other).unwrap() = Jump(inner.len());
                         Back(other)
                     } else {
                         panic!("Matching bracket not found")

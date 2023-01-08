@@ -50,12 +50,12 @@ impl<'a, T: Tape> Runtime<'a, T> {
                     },
                     Jump(n) => {
                         if *self.tape.get(self.tp).unwrap() == 0 {
-                            self.ip = *n + 1;
+                            self.ip = *n;
                         }
                     },
                     Back(n) => {
                         if *self.tape.get(self.tp).unwrap() != 0 {
-                            self.ip = *n + 1;
+                            self.ip = *n;
                         }
                     },
                 };
