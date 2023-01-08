@@ -1,4 +1,4 @@
-use crate::{Program, Operation::*, Tape};
+use crate::{Program, Operation::{*, self}, Tape};
 use std::io::{Read, Write};
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -21,9 +21,9 @@ pub struct Runtime<'a, T: Tape> {
 }
 
 impl<'a, T: Tape> Runtime<'a, T> {
-    pub fn new(len: usize, reader: &'a mut dyn Read, writer: &'a mut dyn Write) -> Self {
+    pub fn new(mem_len: usize, reader: &'a mut dyn Read, writer: &'a mut dyn Write) -> Self {
         Self {
-            tape: Tape::new(len),
+            tape: Tape::new(mem_len),
             tp: 0,
 
             reader,
