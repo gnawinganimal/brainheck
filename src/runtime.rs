@@ -1,4 +1,4 @@
-use crate::{Program, Operation::{*, self}, Tape};
+use crate::{Program, Operation::*, Tape};
 use std::io::{Read, Write};
 
 pub type Result<T> = std::result::Result<T, Error>;

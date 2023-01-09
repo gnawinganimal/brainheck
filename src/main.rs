@@ -1,5 +1,5 @@
 use clap::Parser;
-use std::{fs, io};
+use std::io;
 
 pub mod program;
 pub mod runtime;
