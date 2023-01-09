@@ -78,8 +78,8 @@ mod tests {
         let reader = Vec::new();
         let mut writer = Vec::new();
 
-        let pr = Program::from_file("bf/hello_world.bf".to_string()).unwrap();
-        Runtime::<tape::Array>::new(30000, &mut reader.as_slice(), &mut writer).exec(pr).unwrap();
+        let pr = Program::from_file("bf/hello_world.bf".to_string()).expect("Could not find fb/hello_world.bf");
+        Runtime::<tape::Array>::new(30000, &mut reader.as_slice(), &mut writer).exec(pr).expect("Program quit unexpectedly");
         assert_eq!(std::str::from_utf8(&writer).unwrap(), "Hello World!\n");
     }
 }
