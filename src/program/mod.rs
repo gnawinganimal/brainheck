@@ -1,4 +1,4 @@
-use std::{io, fs, slice::Iter, fmt::{Display, Write}};
+use std::{io, fs, str::FromStr, slice::Iter, fmt::{Display, Write}};
 
 pub mod op;
 
@@ -9,13 +9,34 @@ pub struct Program {
 }
 
 impl Program {
-    pub fn parse(src: String) -> Self {
-        let mut chars = src.chars().peekable();
+    pub fn from_file(path: String) -> io::Result<Self> {
+        Ok(Self::try_from(fs::read_to_string(path)?).unwrap())
+    }
+
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+
+    pub fn get(&self, i: usize) -> Option<&Operation> {
+        self.inner.get(i)
+    }
+
+    pub fn iter(&self) -> Iter<Operation> {
+        self.inner.iter()
+    }
+}
+
+impl FromStr for Program {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut chars = s.chars().peekable();
         let mut inner = Vec::new();
 
         let mut stack = Vec::new();
 
         while let Some(c) = chars.next() {
+            
             let op = match c {
                 '>' => {
                     let mut count = 1;
@@ -71,25 +92,31 @@ impl Program {
             inner.push(op);
         };
 
+        Ok(Self {
+            inner,
+        })
+    }
+}
+
+impl TryFrom<String> for Program {
+    type Error = ();
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        Self::from_str(value.as_str())
+    }
+}
+
+impl From<Vec<Operation>> for Program {
+    fn from(inner: Vec<Operation>) -> Self {
         Self {
             inner,
         }
     }
+}
 
-    pub fn from_file(path: String) -> io::Result<Program> {
-        Ok(Program::parse(fs::read_to_string(path)?))
-    }
-
-    pub fn len(&self) -> usize {
-        self.inner.len()
-    }
-
-    pub fn get(&self, i: usize) -> Option<&Operation> {
-        self.inner.get(i)
-    }
-
-    pub fn iter(&self) -> Iter<Operation> {
-        self.inner.iter()
+impl From<Program> for Vec<Operation> {
+    fn from(value: Program) -> Self {
+        value.inner
     }
 }
 
@@ -111,9 +138,17 @@ mod tests {
 
     #[test]
     fn decode_program() {
-        let program = Program::parse(String::from("[->+<]"));
-        let ops: Vec<_> = program.iter().copied().collect();
+        let program = Program::from_str("[->+<]").unwrap();
+        let ops: Vec<Operation> = program.into();
 
-        assert_eq!(ops, vec![Jump(5), SubCur(1), AddPtr(1), AddCur(1), SubPtr(1), Back(0)])
+        assert_eq!(ops, vec![Jump(5), SubCur(1), AddPtr(1), AddCur(1), SubPtr(1), Back(0)]);
+    }
+
+    #[test]
+    fn encode_program() {
+        let program = Program::from(vec![Jump(5), SubCur(1), AddPtr(1), AddCur(1), SubPtr(1), Back(0)]);
+        let str = format!("{}", program);
+
+        assert_eq!(str.as_str(), "[->+<]");
     }
 }
