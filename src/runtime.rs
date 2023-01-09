@@ -67,3 +67,19 @@ impl<'a, T: Tape> Runtime<'a, T> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::*;
+
+    #[test]
+    fn hello_world() {
+        let reader = Vec::new();
+        let mut writer = Vec::new();
+
+        let pr = Program::from_file("bf/hello_world.bf".to_string()).unwrap();
+        Runtime::<tape::Array>::new(30000, &mut reader.as_slice(), &mut writer).exec(pr).unwrap();
+        assert_eq!(std::str::from_utf8(&writer).unwrap(), "Hello World!\n");
+    }
+}
