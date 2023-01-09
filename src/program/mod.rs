@@ -1,4 +1,4 @@
-use std::{slice::Iter, fmt::{Display, Write}};
+use std::{io, fs, slice::Iter, fmt::{Display, Write}};
 
 pub mod op;
 
@@ -74,6 +74,10 @@ impl Program {
         Self {
             inner,
         }
+    }
+
+    pub fn from_file(path: String) -> io::Result<Program> {
+        Ok(Program::parse(fs::read_to_string(path)?))
     }
 
     pub fn len(&self) -> usize {
