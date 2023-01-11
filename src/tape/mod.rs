@@ -8,11 +8,11 @@ pub trait Tape {
 
     fn len(&self) -> usize;
 
-    fn get(&self, i: usize) -> Option<&u8>;
+    fn get(&self, i: usize) -> Option<u8>;
 
-    fn set(&mut self, i: usize, b: u8);
+    fn set(&mut self, i: usize, b: u8) -> Option<u8>;
 
-    fn add(&mut self, i: usize, b: u8);
+    fn add(&mut self, i: usize, b: u8) -> Option<u8>;
 
-    fn sub(&mut self, i: usize, b: u8);
+    fn sub(&mut self, i: usize, b: u8) -> Option<u8>;
 }

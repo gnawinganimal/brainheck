@@ -8,9 +8,17 @@ pub struct Program {
     inner: Vec<Operation>,
 }
 
+pub type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Clone, Copy, Debug)]
+pub enum Error {
+    IOError,
+    ParseError,
+}
+
 impl Program {
-    pub fn from_file(path: String) -> io::Result<Self> {
-        Ok(Self::try_from(fs::read_to_string(path)?).unwrap())
+    pub fn from_file(path: String) -> Result<Self> {
+        Self::try_from(fs::read_to_string(path).map_err(|_| Error::IOError)?)
     }
 
     pub fn len(&self) -> usize {
@@ -27,9 +35,9 @@ impl Program {
 }
 
 impl FromStr for Program {
-    type Err = ();
+    type Err = Error;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         let mut chars = s.chars().peekable();
         let mut inner = Vec::new();
 
@@ -99,9 +107,9 @@ impl FromStr for Program {
 }
 
 impl TryFrom<String> for Program {
-    type Error = ();
+    type Error = Error;
 
-    fn try_from(value: String) -> Result<Self, Self::Error> {
+    fn try_from(value: String) -> Result<Self> {
         Self::from_str(value.as_str())
     }
 }

@@ -22,31 +22,49 @@ impl Tape for Array {
         self.len
     }
 
-    fn get(&self, i: usize) -> Option<&u8> {
+    fn get(&self, i: usize) -> Option<u8> {
         if i < self.len {
             unsafe {
-                Some(&*self.ptr.add(i))
+                Some(*self.ptr.add(i))
             }
         } else {
             None
         }
     }
 
-    fn set(&mut self, i: usize, b: u8) {
-        unsafe {
-            *self.ptr.add(i) = b;
+    fn set(&mut self, i: usize, b: u8) -> Option<u8> {
+        if i < self.len {
+            unsafe {
+                let ptr = self.ptr.add(i);
+                *ptr = b;
+                Some(*ptr)
+            }
+        } else {
+            None
         }
     }
 
-    fn add(&mut self, i: usize, b: u8) {
-        unsafe {
-            *self.ptr.add(i) = (*self.ptr.add(i)).wrapping_add(b);
+    fn add(&mut self, i: usize, b: u8) -> Option<u8> {
+        if i < self.len {
+            unsafe {
+                let ptr = self.ptr.add(i);
+                *ptr = (*ptr).wrapping_add(b);
+                Some(*ptr)
+            }
+        } else {
+            None
         }
     }
 
-    fn sub(&mut self, i: usize, b: u8) {
-        unsafe {
-            *self.ptr.add(i) = (*self.ptr.add(i)).wrapping_sub(b);
+    fn sub(&mut self, i: usize, b: u8) -> Option<u8> {
+        if i < self.len {
+            unsafe {
+                let ptr = self.ptr.add(i);
+                *ptr = (*ptr).wrapping_sub(b);
+                Some(*ptr)
+            }
+        } else {
+            None
         }
     }
 }

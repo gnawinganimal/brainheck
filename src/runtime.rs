@@ -1,4 +1,4 @@
-use crate::{Program, Operation::*, Tape};
+use crate::{Program, Operation::{*, self}, Tape};
 use std::io::{Read, Write};
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -39,23 +39,39 @@ impl<'a, T: Tape> Runtime<'a, T> {
                 match op {
                     AddPtr(n) => self.tp = self.tp.wrapping_add(*n),
                     SubPtr(n) => self.tp = self.tp.wrapping_sub(*n),
-                    AddCur(n) => self.tape.add(self.tp, *n),
-                    SubCur(n) => self.tape.sub(self.tp, *n),
+                    AddCur(n) => {
+                        self.tape.add(self.tp, *n).ok_or(Error::IndexOutOfBounds)?;
+                    },
+                    SubCur(n) => {
+                        self.tape.sub(self.tp, *n).ok_or(Error::IndexOutOfBounds)?;
+                    },
                     Write => {
-                        self.writer.write(&[*self.tape.get(self.tp).unwrap()])
-                            .map_err(|_| Error::Write)?;
+                        if let Some(b) = self.tape.get(self.tp) {
+                            self.writer.write(&[b])
+                                .map_err(|_| Error::Write)?;
+                        } else {
+                            return Err(Error::IndexOutOfBounds)
+                        }
                     },
                     Read => if let Some(Ok(b)) = self.reader.bytes().next() {
                         self.tape.set(self.tp, b);
                     },
                     Jump(n) => {
-                        if *self.tape.get(self.tp).unwrap() == 0 {
-                            self.ip = *n;
+                        if let Some(b) = self.tape.get(self.tp) {
+                            if b == 0 {
+                                self.ip = *n;
+                            }
+                        } else {
+                            return Err(Error::IndexOutOfBounds)
                         }
                     },
                     Back(n) => {
-                        if *self.tape.get(self.tp).unwrap() != 0 {
-                            self.ip = *n;
+                        if let Some(b) = self.tape.get(self.tp) {
+                            if b != 0 {
+                                self.ip = *n;
+                            }
+                        } else {
+                            return Err(Error::IndexOutOfBounds)
                         }
                     },
                 };
