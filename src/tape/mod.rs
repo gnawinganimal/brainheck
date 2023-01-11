@@ -1,18 +1,84 @@
+use std::{mem, ops::{AddAssign, SubAssign}, alloc::{Layout, alloc, dealloc}};
 
-pub mod array;
+pub struct Tape {
+    len: usize,
+    ptr: *mut u8, // base pointer
+    ofs: usize, // current offset
+}
 
-pub use array::Array;
+impl Tape {
+    pub fn new(len: usize) -> Self {
+        let ptr = unsafe {
+            let layout = Layout::from_size_align_unchecked(len, mem::size_of::<u8>());
+            alloc(layout)
+        };
 
-pub trait Tape {
-    fn new(len: usize) -> Self;
+        Self { 
+            ptr,
+            ofs: 0,
+            len,
+        }
+    }
 
-    fn len(&self) -> usize;
+    pub fn len(&self) -> usize {
+        self.len
+    }
 
-    fn get(&self, i: usize) -> Option<u8>;
+    pub unsafe fn raw(&self) -> *mut u8 {
+        self.ptr.add(self.ofs)
+    }
 
-    fn set(&mut self, i: usize, b: u8) -> Option<u8>;
+    pub fn get(&self) -> Option<u8> {
+        unsafe {
+            if self.ofs < self.len {
+                Some(*self.raw())
+            } else {
+                None
+            }
+        }
+    }
 
-    fn add(&mut self, i: usize, b: u8) -> Option<u8>;
+    pub fn get_mut(&mut self) -> Option<&mut u8> {
+        unsafe {
+            if self.ofs < self.len {
+                Some(&mut *self.raw())
+            } else {
+                None
+            }
+        }
+    }
 
-    fn sub(&mut self, i: usize, b: u8) -> Option<u8>;
+    pub fn insert(&mut self, b: u8) -> Option<()> {
+        unsafe {
+            if self.ofs < self.len {
+                *self.raw() = b;
+                Some(())
+            } else {
+                None
+            }
+        }
+    }
+}
+
+impl AddAssign<usize> for Tape {
+    fn add_assign(&mut self, rhs: usize) {
+        self.ofs += rhs;
+    }
+}
+
+impl SubAssign<usize> for Tape {
+    fn sub_assign(&mut self, rhs: usize) {
+        self.ofs -= rhs;
+    }
+}
+
+impl Drop for Tape {
+    fn drop(&mut self) {
+        unsafe {
+            dealloc(
+                self.ptr,
+                Layout::from_size_align_unchecked(self.len, mem::size_of::<u8>())
+            )
+        };
+    }
 }

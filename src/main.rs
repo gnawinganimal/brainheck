@@ -7,7 +7,7 @@ pub mod tape;
 
 pub use program::{Program, Operation};
 pub use runtime::Runtime;
-pub use tape::{Tape, Array};
+pub use tape::Tape;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Brainfuck interpreter", long_about = None)]
@@ -25,7 +25,7 @@ fn main() -> runtime::Result<()> {
 
     let mut i = io::stdin();
     let mut o = io::stdout();
-    let mut rt: Runtime<tape::Array> = Runtime::new(mem_size, &mut i, &mut o);
+    let mut rt: Runtime = Runtime::new(mem_size, &mut i, &mut o);
 
     rt.exec(program)
 }

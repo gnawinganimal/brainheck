@@ -1,13 +1,12 @@
 use crate::{Program, program::op::*, Tape};
-use std::io::{Read, Write};
+use std::{io::{Read, Write}};
 
 pub mod error;
 
 pub use error::{Error, Result};
 
-pub struct Runtime<'a, T: Tape> {
-    tape: T,
-    tp: usize,
+pub struct Runtime<'a> {
+    tape: Tape,
 
     reader: &'a mut dyn Read,
     writer: &'a mut dyn Write,
@@ -15,11 +14,10 @@ pub struct Runtime<'a, T: Tape> {
     ip: usize, // program counter
 }
 
-impl<'a, T: Tape> Runtime<'a, T> {
+impl<'a> Runtime<'a> {
     pub fn new(mem_len: usize, reader: &'a mut dyn Read, writer: &'a mut dyn Write) -> Self {
         Self {
             tape: Tape::new(mem_len),
-            tp: 0,
 
             reader,
             writer,
@@ -32,42 +30,33 @@ impl<'a, T: Tape> Runtime<'a, T> {
         loop {
             if let Some(op) = prog.get(self.ip) {
                 match op {
-                    AddPtr(n) => self.tp = self.tp.wrapping_add(*n),
-                    SubPtr(n) => self.tp = self.tp.wrapping_sub(*n),
-                    AddCur(n) => {
-                        self.tape.add(self.tp, *n).ok_or(Error::IndexOutOfBounds)?;
-                    },
-                    SubCur(n) => {
-                        self.tape.sub(self.tp, *n).ok_or(Error::IndexOutOfBounds)?;
-                    },
-                    Write => {
-                        if let Some(b) = self.tape.get(self.tp) {
-                            self.writer.write(&[b])
-                                .map_err(|_| Error::WriteError)?;
-                        } else {
-                            return Err(Error::IndexOutOfBounds)
-                        }
+                    AddPtr(n) => self.tape += *n,
+                    SubPtr(n) => self.tape -= *n,
+                    AddCur(n) => *self.tape.get_mut().ok_or(Error::IndexOutOfBounds)? += *n,
+                    SubCur(n) => *self.tape.get_mut().ok_or(Error::IndexOutOfBounds)? -= *n,
+                    Write => if let Some(b) = self.tape.get() {
+                        self.writer.write(&[b]).map_err(|_| Error::WriteError)?;
+                    } else {
+                        return Err(Error::IndexOutOfBounds)
                     },
                     Read => if let Some(Ok(b)) = self.reader.bytes().next() {
-                        self.tape.set(self.tp, b);
+                        *self.tape.get_mut().ok_or(Error::IndexOutOfBounds)? = b;
+                    } else {
+                        return Err(Error::ReadError)
                     },
-                    Jump(n) => {
-                        if let Some(b) = self.tape.get(self.tp) {
-                            if b == 0 {
-                                self.ip = *n;
-                            }
-                        } else {
-                            return Err(Error::IndexOutOfBounds)
+                    Jump(n) => if let Some(b) = self.tape.get() {
+                        if b == 0 {
+                            self.ip = *n;
                         }
+                    } else {
+                        return Err(Error::IndexOutOfBounds)
                     },
-                    Back(n) => {
-                        if let Some(b) = self.tape.get(self.tp) {
-                            if b != 0 {
-                                self.ip = *n;
-                            }
-                        } else {
-                            return Err(Error::IndexOutOfBounds)
+                    Back(n) => if let Some(b) = self.tape.get() {
+                        if b != 0 {
+                            self.ip = *n;
                         }
+                    } else {
+                        return Err(Error::IndexOutOfBounds)
                     },
                 };
     
@@ -90,7 +79,7 @@ mod tests {
         let mut writer = Vec::new();
 
         let pr = Program::from_file("bf/hello_world.bf".to_string()).expect("Could not find fb/hello_world.bf");
-        Runtime::<tape::Array>::new(30000, &mut reader.as_slice(), &mut writer).exec(pr).expect("Program quit unexpectedly");
+        Runtime::new(30000, &mut reader.as_slice(), &mut writer).exec(pr).expect("Program quit unexpectedly");
         assert_eq!(std::str::from_utf8(&writer).unwrap(), "Hello World!\n");
     }
 }
