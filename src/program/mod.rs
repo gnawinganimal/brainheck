@@ -1,24 +1,18 @@
-use std::{io, fs, str::FromStr, slice::Iter, fmt::{Display, Write}};
+use std::{fs, str::FromStr, slice::Iter, fmt::{Display, Write}};
 
 pub mod op;
+pub mod error;
 
 pub use op::Operation::{self, *};
+pub use error::{Error, Result};
 
 pub struct Program {
     inner: Vec<Operation>,
 }
 
-pub type Result<T> = std::result::Result<T, Error>;
-
-#[derive(Clone, Copy, Debug)]
-pub enum Error {
-    IOError,
-    ParseError,
-}
-
 impl Program {
     pub fn from_file(path: String) -> Result<Self> {
-        Self::try_from(fs::read_to_string(path).map_err(|_| Error::IOError)?)
+        Self::try_from(fs::read_to_string(path).map_err(|_| Error::FileError)?)
     }
 
     pub fn len(&self) -> usize {

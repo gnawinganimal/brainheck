@@ -1,14 +1,9 @@
-use crate::{Program, Operation::{*, self}, Tape};
+use crate::{Program, program::op::*, Tape};
 use std::io::{Read, Write};
 
-pub type Result<T> = std::result::Result<T, Error>;
+pub mod error;
 
-#[derive(Debug)]
-pub enum Error {
-    IndexOutOfBounds,
-    Read,
-    Write,
-}
+pub use error::{Error, Result};
 
 pub struct Runtime<'a, T: Tape> {
     tape: T,
@@ -48,7 +43,7 @@ impl<'a, T: Tape> Runtime<'a, T> {
                     Write => {
                         if let Some(b) = self.tape.get(self.tp) {
                             self.writer.write(&[b])
-                                .map_err(|_| Error::Write)?;
+                                .map_err(|_| Error::WriteError)?;
                         } else {
                             return Err(Error::IndexOutOfBounds)
                         }
