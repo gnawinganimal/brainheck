@@ -39,42 +39,42 @@ impl<'a> Runtime<'a> {
             AddCur(n) => if let Some(b) = self.tape.get_mut() {
                 *b += *n;
             } else {
-                return Some(Err(Error::IndexOutOfBounds));
+                return Some(Err(Error::new(error::IndexOutOfBounds, *op)));
             },
             SubCur(n) => if let Some(b) = self.tape.get_mut() {
                 *b -= *n;
             } else {
-                return Some(Err(Error::IndexOutOfBounds));
+                return Some(Err(Error::new(error::IndexOutOfBounds, *op)));
             },
             Write => if let Some(b) = self.tape.get() {
                 if let Err(_) = self.writer.write(&[b]) {
-                    return Some(Err(Error::WriteError));
+                    return Some(Err(Error::new(error::WriteError, *op)));
                 };
             } else {
-                return Some(Err(Error::IndexOutOfBounds));
+                return Some(Err(Error::new(error::IndexOutOfBounds, *op)));
             },
             Read => if let Some(Ok(i)) = self.reader.bytes().next() {
                 if let Some(b) = self.tape.get_mut() {
                     *b = i;
                 } else {
-                    return Some(Err(Error::IndexOutOfBounds));
+                    return Some(Err(Error::new(error::IndexOutOfBounds, *op)));
                 }
             } else {
-                return Some(Err(Error::ReadError));
+                return Some(Err(Error::new(error::IndexOutOfBounds, *op)));
             },
             Jump(n) => if let Some(b) = self.tape.get() {
                 if b == 0 {
                     self.pc = *n;
                 }
             } else {
-                return Some(Err(Error::IndexOutOfBounds))
+                return Some(Err(Error::new(error::IndexOutOfBounds, *op)));
             },
             Back(n) => if let Some(b) = self.tape.get() {
                 if b != 0 {
                     self.pc = *n;
                 }
             } else {
-                return Some(Err(Error::IndexOutOfBounds))
+                return Some(Err(Error::new(error::IndexOutOfBounds, *op)));
             },
         };
 
