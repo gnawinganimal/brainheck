@@ -13,6 +13,7 @@ pub struct Runtime<'a> {
     reader: &'a mut dyn Read,
     writer: &'a mut dyn Write,
 
+    cc: usize, // cycle counter
     pc: usize, // program counter
 }
 
@@ -26,11 +27,14 @@ impl<'a> Runtime<'a> {
             reader,
             writer,
 
+            cc: 0,
             pc: 0,
         }
     }
 
     pub fn next(&mut self) -> Option<Result<()>> {
+        self.cc += 1;
+        
         let op = self.program.get(self.pc)?;
 
         match op {
